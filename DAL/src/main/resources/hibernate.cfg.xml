@@ -1,0 +1,22 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <property name="connection.url">jdbc:postgresql://localhost:1337/cat_db?useSSL=false&amp;serverTimezone=UTC</property> <!-- BD Mane -->
+        <property name="connection.driver_class">org.postgresql.Driver</property> <!-- DB Driver -->
+        <property name="connection.username">obt</property> <!-- DB User -->
+        <property name="connection.password">1234</property> <!-- DB Password -->
+
+        <property name="show_sql">true</property> <!-- Show SQL in console -->
+        <property name="hibernate.format_sql">true</property> <!-- Show SQL formatted -->
+
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <mapping class="Entities.Cat"/>
+        <mapping class="Entities.Master"/>
+
+    </session-factory>
+</hibernate-configuration>
