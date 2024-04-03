@@ -21,13 +21,17 @@ public class MasterService extends AbstractService implements IMasterService {
         master.setName(masterDTO.name());
         master.setBirthDate(masterDTO.birthDate());
         master.setCats(new ArrayList<>());
-        long id = context.getMasterDAO().save(master);
+        context.getMasterDAO().openCurrentSessionWithTransaction();
+        long id = context.getMasterDAO().save(master).getId();
+        context.getMasterDAO().closeCurrentSessionWithTransaction();
         return new MasterDTO(id, master.getName(), master.getBirthDate());
     }
 
     public List<CatDTO> getCats(Long masterId) {
+        context.getMasterDAO().openCurrentSessionWithTransaction();
         var masterOpt = context.getMasterDAO().get(masterId);
         if (masterOpt.isEmpty()) {
+            context.getMasterDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Master " + masterId + " ");
         }
 
@@ -36,6 +40,7 @@ public class MasterService extends AbstractService implements IMasterService {
         for (Cat cat : master.getCats()) {
             cats.add(new CatDTO(cat.getId(), cat.getName(), cat.getBirthDate(), cat.getBreed(), cat.getColor().toString(), cat.getMaster().getId()));
         }
+        context.getMasterDAO().closeCurrentSessionWithTransaction();
         return cats;
     }
 }

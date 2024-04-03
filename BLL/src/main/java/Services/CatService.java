@@ -10,7 +10,6 @@ import Models.Color;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CatService extends AbstractService implements ICatService {
 
@@ -31,70 +30,78 @@ public class CatService extends AbstractService implements ICatService {
 
         cat.setMaster(master.get());
         cat.setFriends(new ArrayList<>());
-        long id = context.getCatDAO().save(cat);
+        context.getCatDAO().openCurrentSessionWithTransaction();
+        long id = context.getCatDAO().save(cat).getId();
+        context.getCatDAO().closeCurrentSessionWithTransaction();
         return new CatDTO(id, cat.getName(), cat.getBirthDate(), cat.getBreed(), cat.getColor().toString(), cat.getMaster().getId());
 
     }
 
     public CatDTO befriend(Long firstCatId, Long secondCatId) {
+        context.getCatDAO().openCurrentSessionWithTransaction();
         var firstCatOpt = context.getCatDAO().get(firstCatId);
         if (firstCatOpt.isEmpty()) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Cat " + firstCatId + " ");
         }
 
         var secondCatOpt = context.getCatDAO().get(secondCatId);
         if (secondCatOpt.isEmpty()) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Cat " + secondCatId + " ");
         }
 
         var firstCat = firstCatOpt.get();
         var secondCat = secondCatOpt.get();
-        if (verifyFriendship(secondCat, firstCat.getFriends())) {
-            throw new FriendshipException(firstCatId, secondCatId);
+
+        if (firstCat.getFriends().contains(secondCat) || secondCat.getFriends().contains(firstCat)) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
+            throw new FriendshipException(secondCatId, firstCatId);
         }
 
-//        if (verifyFriendship(firstCat, secondCat.getFriends())) {
-//            throw new FriendshipException(secondCatId, firstCatId);
-//        }
-
         firstCat.getFriends().add(secondCat);
+        secondCat.getFriends().add(firstCat);
         context.getCatDAO().update(firstCat);
-//        secondCat.getFriends().add(firstCat);
-//        context.getCatDAO().update(secondCat);
+        context.getCatDAO().update(secondCat);
+        context.getCatDAO().closeCurrentSessionWithTransaction();
         return new CatDTO(firstCat.getId(), firstCat.getName(), firstCat.getBirthDate(), firstCat.getBreed(), firstCat.getColor().toString(), firstCat.getMaster().getId());
     }
 
     public CatDTO quarrel(Long firstCatId, Long secondCatId) {
+        context.getCatDAO().openCurrentSessionWithTransaction();
         var firstCatOpt = context.getCatDAO().get(firstCatId);
         if (firstCatOpt.isEmpty()) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Cat " + firstCatId + " ");
         }
 
         var secondCatOpt = context.getCatDAO().get(secondCatId);
         if (secondCatOpt.isEmpty()) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Cat " + secondCatId + " ");
         }
 
         var firstCat = firstCatOpt.get();
         var secondCat = secondCatOpt.get();
-        if (!verifyFriendship(secondCat, firstCat.getFriends())) {
+
+        if (!firstCat.getFriends().contains(secondCat) || !secondCat.getFriends().contains(firstCat)) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new QuarrelException(firstCatId, secondCatId);
         }
 
-//        if (!verifyFriendship(firstCat, secondCat.getFriends())) {
-//            throw new QuarrelException(secondCatId, firstCatId);
-//        }
-
-        deleteFriend(secondCat, firstCat.getFriends());
+        firstCat.getFriends().remove(secondCat);
+        secondCat.getFriends().remove(firstCat);
         context.getCatDAO().update(firstCat);
-//        deleteFriend(firstCat, secondCat.getFriends());
-//        context.getCatDAO().update(secondCat);
+        context.getCatDAO().update(secondCat);
+        context.getCatDAO().closeCurrentSessionWithTransaction();
         return new CatDTO(firstCat.getId(), firstCat.getName(), firstCat.getBirthDate(), firstCat.getBreed(), firstCat.getColor().toString(), firstCat.getMaster().getId());
     }
 
     public List<CatDTO> getFriends(Long catId) {
+        context.getCatDAO().openCurrentSessionWithTransaction();
         var catOpt = context.getCatDAO().get(catId);
         if (catOpt.isEmpty()) {
+            context.getCatDAO().closeCurrentSessionWithTransaction();
             throw new NotFoundException("Cat " + catId + " ");
         }
 
@@ -103,27 +110,7 @@ public class CatService extends AbstractService implements ICatService {
         for (Cat friend : cat.getFriends()) {
             friends.add(new CatDTO(friend.getId(), friend.getName(), friend.getBirthDate(), friend.getBreed(), friend.getColor().toString(), friend.getMaster().getId()));
         }
+        context.getCatDAO().closeCurrentSessionWithTransaction();
         return friends;
-    }
-
-    private boolean verifyFriendship(Cat cat, List<Cat> friends) {
-        for (var friend : friends) {
-            if (Objects.equals(friend.getId(), cat.getId())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void deleteFriend(Cat cat, List<Cat> friends) {
-        var iterator = friends.iterator();
-        while (iterator.hasNext()) {
-            Cat friend = iterator.next();
-            if (friend.getId().equals(cat.getId())) {
-                iterator.remove();
-                break;
-            }
-        }
     }
 }

@@ -5,15 +5,16 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "cats")
-public class Cat {
+public class Cat implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +34,7 @@ public class Cat {
     @JoinColumn(name = "master_id")
     private Master master;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(
 
             name = "friendship",
@@ -41,4 +42,18 @@ public class Cat {
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
     private List<Cat> friends;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Cat cat = (Cat) obj;
+        return Objects.equals(id, cat.id);
+    }
 }

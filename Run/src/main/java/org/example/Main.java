@@ -35,7 +35,8 @@ public class Main {
 //        befriendController.execute(2L, 3L);
 //        quarrelController.execute(1L, 2L);
 //        befriendController.execute(2L, 1L);
+//        retrieveCatsController.execute(1L);
+//        retrieveFriendsController.execute(2L);
         retrieveCatsController.execute(1L);
-        retrieveFriendsController.execute(2L);
     }
 }
