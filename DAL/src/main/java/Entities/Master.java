@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents a master entity with its attributes such as name, birthdate, and list of cats.
+ */
 @Entity
 @Getter
 @Setter

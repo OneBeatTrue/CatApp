@@ -5,6 +5,9 @@ import DTO.MasterDTO;
 import Services.ICatService;
 import Services.IMasterService;
 
+/**
+ * Controller class for creating a new cat.
+ */
 public class CreateCatController extends CatServiceController {
     public CreateCatController(ICatService catService) {
         super(catService);

@@ -6,6 +6,9 @@ import Services.IMasterService;
 
 import java.util.List;
 
+/**
+ * Controller class for retrieving cats belonging to a master.
+ */
 public class RetrieveCatsController extends MasterServiceController {
     public RetrieveCatsController(IMasterService masterService) {
         super(masterService);

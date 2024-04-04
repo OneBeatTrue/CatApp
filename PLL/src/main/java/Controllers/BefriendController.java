@@ -3,6 +3,9 @@ package Controllers;
 import DTO.CatDTO;
 import Services.ICatService;
 
+/**
+ * Controller class for handling the befriending operation between cats.
+ */
 public class BefriendController extends CatServiceController {
     public BefriendController(ICatService catService) {
         super(catService);

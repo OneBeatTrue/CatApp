@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents a cat entity with its attributes such as name, birthdate, breed, color, master, and list of friends.
+ */
 @Entity
 @Getter
 @Setter

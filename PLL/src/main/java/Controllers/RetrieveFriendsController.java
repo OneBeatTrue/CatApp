@@ -5,6 +5,9 @@ import Services.ICatService;
 
 import java.util.List;
 
+/**
+ * Controller class for retrieving friends of a cat.
+ */
 public class RetrieveFriendsController extends CatServiceController {
     public RetrieveFriendsController(ICatService catService) {
         super(catService);

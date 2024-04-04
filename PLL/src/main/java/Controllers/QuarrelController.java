@@ -3,6 +3,9 @@ package Controllers;
 import DTO.CatDTO;
 import Services.ICatService;
 
+/**
+ * Controller class for handling the quarreling operation between cats.
+ */
 public class QuarrelController extends CatServiceController {
     public QuarrelController(ICatService catService) {
         super(catService);
