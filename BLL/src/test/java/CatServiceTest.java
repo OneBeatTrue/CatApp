@@ -1,15 +1,12 @@
-import Context.IDataContext;
-import DAO.DAO;
-import DTO.CatDTO;
-import DTO.MasterDTO;
-import Entities.Cat;
-import Entities.Master;
-import Exceptions.FriendshipException;
-import Exceptions.NotFoundException;
-import Exceptions.QuarrelException;
-import Models.Color;
-import Services.CatService;
-import Services.ICatService;
+import ru.onebeattrue.dto.CatDTO;
+import ru.onebeattrue.entities.Cat;
+import ru.onebeattrue.entities.Master;
+import ru.onebeattrue.exceptions.FriendshipException;
+import ru.onebeattrue.exceptions.QuarrelException;
+import ru.onebeattrue.models.Color;
+import ru.onebeattrue.repositories.CatRepository;
+import ru.onebeattrue.repositories.MasterRepository;
+import ru.onebeattrue.services.CatService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -27,33 +23,22 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CatServiceTest {
 
-    private ICatService catService;
+    @InjectMocks
+    private CatService catService;
     @Mock
-    private DAO<Cat> catDAO;
-    @Mock
-    private DAO<Master> masterDAO;
-    @Mock
-    private IDataContext context;
+    private CatRepository catRepository;
 
     @BeforeEach
     void setUp() {
         Master master = createMaster();
         Cat firstCat = createCat(master);
         Cat secondCat = createAnotherCat(master);
-
-        Mockito.doNothing().when(catDAO).openCurrentSessionWithTransaction();
-        Mockito.doNothing().when(catDAO).closeCurrentSessionWithTransaction();
-        Mockito.when(catDAO.get(1L)).thenReturn(Optional.of(firstCat));
-        Mockito.when(catDAO.get(2L)).thenReturn(Optional.of(secondCat));
-
-        Mockito.when(context.getCatDAO()).thenReturn(catDAO);
-
-        catService = new CatService(context);
+        Mockito.when(catRepository.findById(1L)).thenReturn(Optional.of(firstCat));
+        Mockito.when(catRepository.findById(2L)).thenReturn(Optional.of(secondCat));
     }
 
     @Test
@@ -64,8 +49,8 @@ class CatServiceTest {
         CatDTO befriendedCat = catService.befriend(1L, 2L);
 
         Assertions.assertEquals(firstCat, befriendedCat);
-        Mockito.verify(catDAO, times(1)).get(1L);
-        Mockito.verify(catDAO, times(1)).get(2L);
+        Mockito.verify(catRepository, times(1)).findById(1L);
+        Mockito.verify(catRepository, times(1)).findById(2L);
     }
 
     @Test

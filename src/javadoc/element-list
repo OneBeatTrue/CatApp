@@ -1,9 +1,8 @@
-Context
-Controllers
-DAO
-DTO
-Entities
-Exceptions
-Models
-org.example
-Services
+ru.onebeattrue
+ru.onebeattrue.controllers
+ru.onebeattrue.dto
+ru.onebeattrue.entities
+ru.onebeattrue.exceptions
+ru.onebeattrue.models
+ru.onebeattrue.repositories
+ru.onebeattrue.services

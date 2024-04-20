@@ -1,6 +1,6 @@
-import Controllers.CatController;
-import DTO.CatDTO;
-import Services.CatService;
+import ru.onebeattrue.controllers.CatController;
+import ru.onebeattrue.dto.CatDTO;
+import ru.onebeattrue.services.CatService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

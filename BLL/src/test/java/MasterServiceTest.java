@@ -1,17 +1,14 @@
-import Context.IDataContext;
-import DAO.DAO;
-import DTO.CatDTO;
-import Entities.Cat;
-import Entities.Master;
-import Models.Color;
-import Services.CatService;
-import Services.ICatService;
-import Services.IMasterService;
-import Services.MasterService;
+import ru.onebeattrue.dto.CatDTO;
+import ru.onebeattrue.entities.Cat;
+import ru.onebeattrue.entities.Master;
+import ru.onebeattrue.models.Color;
+import ru.onebeattrue.repositories.MasterRepository;
+import ru.onebeattrue.services.MasterService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,11 +20,10 @@ import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class MasterServiceTest {
-    private IMasterService masterService;
+    @InjectMocks
+    private MasterService masterService;
     @Mock
-    private DAO<Master> masterDAO;
-    @Mock
-    private IDataContext context;
+    private MasterRepository masterRepository;
 
     @BeforeEach
     void setUp() {
@@ -35,12 +31,7 @@ class MasterServiceTest {
         Cat firstCat = createCat(master);
         Cat secondCat = createAnotherCat(master);
 
-        Mockito.doNothing().when(masterDAO).openCurrentSessionWithTransaction();
-        Mockito.doNothing().when(masterDAO).closeCurrentSessionWithTransaction();
-        Mockito.when(masterDAO.get(1L)).thenReturn(Optional.of(master));
-        Mockito.when(context.getMasterDAO()).thenReturn(masterDAO);
-
-        masterService = new MasterService(context);
+        Mockito.when(masterRepository.findById(1L)).thenReturn(Optional.of(master));
     }
 
     @Test
