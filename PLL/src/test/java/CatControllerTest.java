@@ -1,52 +1,186 @@
-import ru.onebeattrue.controllers.CatController;
-import ru.onebeattrue.dto.CatDTO;
-import ru.onebeattrue.services.CatService;
+import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import ru.onebeattrue.DemoApplication;
 
-import java.util.GregorianCalendar;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.mockito.Mockito.times;
-
-@ExtendWith(MockitoExtension.class)
-class CatControllerTest {
-    @InjectMocks
-    private CatController catController;
-    @Mock
-    private CatService catService;
+@SpringBootTest(classes = DemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class CatControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
-    void testCreate() {
-        CatDTO firstCat = new CatDTO(1L, "Whiskers", new GregorianCalendar(2023, 1, 15).getTime(), "Maine Coon", "GINGER", 1L);
-        CatDTO secondCat = new CatDTO(2L, "Felix", new GregorianCalendar(2023, 1, 17).getTime(), "Siamese", "BLACK", 1L);
-
-        catController.create(firstCat);
-
-        Mockito.verify(catService, times(1)).create(firstCat);
+    @Order(1)
+    void failureUnAuthAccessTest() throws Exception {
+        mockMvc
+                .perform(get("/cat/retrieve/all"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    void testBefriend() {
-        catController.befriend(1L, 2L);
+    @Order(2)
+    void failureAdminAccessTest() throws Exception {
+        mockMvc
+                .perform(post("/auth/sign-up")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "dimaTivator",
+                                  "password": "12343456sdcsd",
+                                  "name": "dima",
+                                  "birthDate": "2004-06-04"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists());
 
-        Mockito.verify(catService, times(1)).befriend(1L, 2L);
+        MvcResult result = mockMvc
+                .perform(post("/auth/sign-in")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "dimaTivator",
+                                  "password": "12343456sdcsd"
+                                }
+                                """))
+                .andReturn();
+
+        String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        mockMvc
+                .perform(get("/cat/retrieve/all")
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    void testQuarrel() {
-        catController.quarrel(1L, 2L);
+    @Order(3)
+    void successAdminAccessTest() throws Exception {
+        mockMvc
+                .perform(post("/auth/sign-up-as-admin")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "onebeattrue",
+                                  "password": "12343456",
+                                  "name": "nikita",
+                                  "birthDate": "2004-02-06"
+                                }"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists());
 
-        Mockito.verify(catService, times(1)).quarrel(1L, 2L);
+        MvcResult result = mockMvc
+                .perform(post("/auth/sign-in")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "onebeattrue",
+                                  "password": "12343456"
+                                }
+                                """))
+                .andReturn();
+
+        String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        mockMvc
+                .perform(post("/cat/create")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "name": "Vasya",
+                                  "birthDate": "2008-01-02",
+                                  "breed": "Italian",
+                                  "color": "MIXED",
+                                  "master": 1
+                                }"""))
+                .andExpect(status().isOk());
+        mockMvc
+                .perform(post("/cat/create")
+                        .header("Authorization", "Bearer " + jwt)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "name": "Boris",
+                                  "birthDate": "2018-01-02",
+                                  "breed": "Russian",
+                                  "color": "GINGER",
+                                  "master": 2
+                                }"""))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testRetrieveFriends() {
-        catController.retrieveFriends(1L);
+    @Order(4)
+    void failureUserDependentTest() throws Exception {
+        MvcResult result = mockMvc
+                .perform(post("/auth/sign-in")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "dimaTivator",
+                                  "password": "12343456sdcsd"
+                                }
+                                """))
+                .andReturn();
 
-        Mockito.verify(catService, times(1)).getFriends(1L);
+        String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        mockMvc
+                .perform(get("/cat/retrieve/2")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Order(5)
+    void successUserDependentTest() throws Exception {
+        MvcResult result = mockMvc
+                .perform(post("/auth/sign-in")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "dimaTivator",
+                                  "password": "12343456sdcsd"
+                                }
+                                """))
+                .andReturn();
+
+        String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        mockMvc
+                .perform(get("/cat/retrieve/1")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(6)
+    void successAdminTest() throws Exception {
+        MvcResult result = mockMvc
+                .perform(post("/auth/sign-in")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "onebeattrue",
+                                  "password": "12343456"
+                                }
+                                """))
+                .andReturn();
+
+        String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        mockMvc
+                .perform(get("/cat/retrieve/1")
+                        .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk());
     }
 }

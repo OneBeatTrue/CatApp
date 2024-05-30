@@ -1,9 +1,8 @@
 package ru.onebeattrue.entities;
 
+import lombok.*;
 import ru.onebeattrue.models.Color;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +15,9 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "cats")
 public class Cat implements Serializable {
     @Id
@@ -28,9 +30,11 @@ public class Cat implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date birthDate;
 
+    @Column(nullable = false)
     private String breed;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Color color;
 
     @ManyToOne

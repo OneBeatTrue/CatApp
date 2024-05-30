@@ -17,6 +17,7 @@
 
         <mapping class="ru.onebeattrue.entities.Cat"/>
         <mapping class="ru.onebeattrue.entities.Master"/>
+        <mapping class="ru.onebeattrue.entities.User"/>
 
     </session-factory>
 </hibernate-configuration>

@@ -1,6 +1,8 @@
 package ru.onebeattrue.services;
 
+import lombok.RequiredArgsConstructor;
 import ru.onebeattrue.dto.CatDTO;
+import ru.onebeattrue.dto.ColorDTO;
 import ru.onebeattrue.entities.Cat;
 import ru.onebeattrue.exceptions.FriendshipException;
 import ru.onebeattrue.exceptions.NotFoundException;
@@ -16,51 +18,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @ComponentScan("Repositories")
-public class CatService implements ICatService {
+public class CatService {
     private final CatRepository catRepository;
 
     private final MasterRepository masterRepository;
 
-    @Autowired
-    public CatService(CatRepository catRepository,
-                      MasterRepository masterRepository) {
-        this.catRepository = catRepository;
-        this.masterRepository = masterRepository;
-    }
-
     public CatDTO create(CatDTO catDTO) {
-        var cat = new Cat();
-        cat.setName(catDTO.name());
-        cat.setBirthDate(catDTO.birthDate());
-        cat.setBreed(catDTO.breed());
-        cat.setColor(Color.valueOf(catDTO.color()));
-        var master = masterRepository.findById(catDTO.master());
-        if (master.isEmpty()) {
-            throw new NotFoundException("Master " + catDTO.master() + " ");
-        }
+        var cat = Cat.builder()
+                .name(catDTO.name())
+                .birthDate(catDTO.birthDate())
+                .breed(catDTO.breed())
+                .color(catDTO.color())
+                .master(masterRepository.findById(catDTO.master()).orElseThrow(() -> new NotFoundException("Master " + catDTO.master() + " ")))
+                .friends(new ArrayList<>())
+                .build();
 
-        cat.setMaster(master.get());
-        cat.setFriends(new ArrayList<>());
-        long id = catRepository.save(cat).getId();
-        return new CatDTO(id, cat.getName(), cat.getBirthDate(), cat.getBreed(), cat.getColor().toString(), cat.getMaster().getId());
-
+        return new CatDTO(catRepository.save(cat));
     }
 
     public CatDTO befriend(Long firstCatId, Long secondCatId) {
-        var firstCatOpt = catRepository.findById(firstCatId);
-        if (firstCatOpt.isEmpty()) {
-            throw new NotFoundException("Cat " + firstCatId + " ");
-        }
-
-        var secondCatOpt = catRepository.findById(secondCatId);
-        if (secondCatOpt.isEmpty()) {
-            throw new NotFoundException("Cat " + secondCatId + " ");
-        }
-
-        var firstCat = firstCatOpt.get();
-        var secondCat = secondCatOpt.get();
-
+        var firstCat = catRepository.findById(firstCatId).orElseThrow(() -> new NotFoundException("Cat " + firstCatId + " "));
+        var secondCat = catRepository.findById(secondCatId).orElseThrow(() -> new NotFoundException("Cat " + secondCatId + " "));
         if (firstCat.getFriends().contains(secondCat) || secondCat.getFriends().contains(firstCat)) {
             throw new FriendshipException(secondCatId, firstCatId);
         }
@@ -69,23 +49,12 @@ public class CatService implements ICatService {
         secondCat.getFriends().add(firstCat);
         catRepository.save(firstCat);
         catRepository.save(secondCat);
-        return new CatDTO(firstCat.getId(), firstCat.getName(), firstCat.getBirthDate(), firstCat.getBreed(), firstCat.getColor().toString(), firstCat.getMaster().getId());
+        return new CatDTO(firstCat);
     }
 
     public CatDTO quarrel(Long firstCatId, Long secondCatId) {
-        var firstCatOpt = catRepository.findById(firstCatId);
-        if (firstCatOpt.isEmpty()) {
-            throw new NotFoundException("Cat " + firstCatId + " ");
-        }
-
-        var secondCatOpt = catRepository.findById(secondCatId);
-        if (secondCatOpt.isEmpty()) {
-            throw new NotFoundException("Cat " + secondCatId + " ");
-        }
-
-        var firstCat = firstCatOpt.get();
-        var secondCat = secondCatOpt.get();
-
+        var firstCat = catRepository.findById(firstCatId).orElseThrow(() -> new NotFoundException("Cat " + firstCatId + " "));
+        var secondCat = catRepository.findById(secondCatId).orElseThrow(() -> new NotFoundException("Cat " + secondCatId + " "));
         if (!firstCat.getFriends().contains(secondCat) || !secondCat.getFriends().contains(firstCat)) {
             throw new QuarrelException(firstCatId, secondCatId);
         }
@@ -94,39 +63,48 @@ public class CatService implements ICatService {
         secondCat.getFriends().remove(firstCat);
         catRepository.save(firstCat);
         catRepository.save(secondCat);
-        return new CatDTO(firstCat.getId(), firstCat.getName(), firstCat.getBirthDate(), firstCat.getBreed(), firstCat.getColor().toString(), firstCat.getMaster().getId());
+        return new CatDTO(firstCat);
     }
 
     public List<CatDTO> getFriends(Long catId) {
-        var catOpt = catRepository.findById(catId);
-        if (catOpt.isEmpty()) {
-            throw new NotFoundException("Cat " + catId + " ");
-        }
-
-        var cat = catOpt.get();
+        var cat = catRepository.findById(catId).orElseThrow(() -> new NotFoundException("Cat " + catId + " "));
         List<CatDTO> friends = new ArrayList<>();
         for (Cat friend : cat.getFriends()) {
-            friends.add(new CatDTO(friend.getId(), friend.getName(), friend.getBirthDate(), friend.getBreed(), friend.getColor().toString(), friend.getMaster().getId()));
+            friends.add(new CatDTO(friend));
         }
         return friends;
     }
 
-    public List<CatDTO> getCatsByColor(String color) {
+    public List<CatDTO> getAll() {
         List<CatDTO> cats = new ArrayList<>();
-        for (Cat cat : catRepository.findAllByColor(Color.valueOf(color))) {
-            cats.add(new CatDTO(cat.getId(), cat.getName(), cat.getBirthDate(), cat.getBreed(), cat.getColor().toString(), cat.getMaster().getId()));
+        for (Cat cat : catRepository.findAll()) {
+            cats.add(new CatDTO(cat));
+        }
+
+        return cats;
+    }
+
+    public List<CatDTO> getCatsByColor(ColorDTO color) {
+        List<CatDTO> cats = new ArrayList<>();
+        for (Cat cat : catRepository.findAllByColor(color.color())) {
+            cats.add(new CatDTO(cat));
+        }
+
+        return cats;
+    }
+
+    public List<CatDTO> getCatsByColor(ColorDTO color, Long masterId) {
+        List<CatDTO> cats = new ArrayList<>();
+        for (Cat cat : catRepository.findAllByColor(color.color())) {
+            if (cat.getMaster().getId().equals(masterId)) {
+                cats.add(new CatDTO(cat));
+            }
         }
 
         return cats;
     }
 
     public CatDTO getCatById(Long catId) {
-        var catOptional = catRepository.findById(catId);
-        if (catOptional.isEmpty()) {
-            throw new NotFoundException("Cat " + catId + " ");
-        }
-
-        var cat = catOptional.get();
-        return new CatDTO(catId, cat.getName(), cat.getBirthDate(), cat.getBreed(), cat.getColor().toString(), cat.getMaster().getId());
+        return new CatDTO(catRepository.findById(catId).orElseThrow(() -> new NotFoundException("Cat " + catId + " ")));
     }
 }
