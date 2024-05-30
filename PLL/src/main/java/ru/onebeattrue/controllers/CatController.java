@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import ru.onebeattrue.dto.ColorDTO;
 import ru.onebeattrue.dto.CatDTO;
 import ru.onebeattrue.dto.MasterDTO;
+import ru.onebeattrue.models.Color;
 import ru.onebeattrue.services.CatService;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +51,8 @@ public class CatController {
         return catService.getFriends(catId);
     }
 
-    @GetMapping("/bycolor")
-    public List<CatDTO> retrieveAllByColor(@Valid @RequestBody ColorDTO color) {
+    @GetMapping("/bycolor/{color}")
+    public List<CatDTO> retrieveAllByColor(@PathVariable("color") ColorDTO color) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return catService.getCatsByColor(color);
