@@ -73,28 +73,28 @@ public class CatService {
     }
 
     @RabbitListener(queues = "getFriendsCatQueue")
-    public CatListDTO getFriends(Long catId) {
+    public List<CatDTO> getFriends(Long catId) {
         var cat = catRepository.findById(catId).orElseThrow(() -> new NotFoundException("Cat " + catId + " "));
         List<CatDTO> friends = new ArrayList<>();
         for (Cat friend : cat.getFriends()) {
             friends.add(new CatDTO(friend));
         }
 
-        return new CatListDTO(friends);
+        return friends;
     }
 
     @RabbitListener(queues = "getAllCatsByColorCatQueue")
-    public CatListDTO getCatsByColor(ColorDTO color) {
+    public List<CatDTO> getCatsByColor(ColorDTO color) {
         List<CatDTO> cats = new ArrayList<>();
         for (Cat cat : catRepository.findAllByColor(color.color())) {
             cats.add(new CatDTO(cat));
         }
 
-        return new CatListDTO(cats);
+        return cats;
     }
 
     @RabbitListener(queues = "getCatsByColorCatQueue")
-    public CatListDTO getCatsByColor(ColorAndIdDTO colorAndIdDTO) {
+    public List<CatDTO> getCatsByColor(ColorAndIdDTO colorAndIdDTO) {
         List<CatDTO> cats = new ArrayList<>();
         for (Cat cat : catRepository.findAllByColor(colorAndIdDTO.color())) {
             if (cat.getMaster().equals(colorAndIdDTO.masterId())) {
@@ -102,7 +102,7 @@ public class CatService {
             }
         }
 
-        return new CatListDTO(cats);
+        return cats;
     }
 
     @RabbitListener(queues = "getCatByIdCatQueue")
@@ -111,17 +111,17 @@ public class CatService {
     }
 
     @RabbitListener(queues = "getAllCatQueue")
-    public CatListDTO getAll() {
+    public List<CatDTO> getAll() {
         List<CatDTO> cats = new ArrayList<>();
         for (Cat cat : catRepository.findAll()) {
             cats.add(new CatDTO(cat));
         }
 
-        return new CatListDTO(cats);
+        return cats;
     }
 
     @RabbitListener(queues = "getCatsByMasterCatQueue")
-    public CatListDTO getCatsByMaster(Long master) {
+    public List<CatDTO> getCatsByMaster(Long master) {
         List<CatDTO> cats = new ArrayList<>();
         for (Cat cat : catRepository.findAll()) {
             if (cat.getMaster().equals(master)) {
@@ -129,6 +129,6 @@ public class CatService {
             }
         }
 
-        return new CatListDTO(cats);
+        return cats;
     }
 }

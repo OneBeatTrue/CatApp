@@ -3,6 +3,7 @@ package ru.onebeattrue.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.*;
 import ru.onebeattrue.dto.CatDTO;
 import ru.onebeattrue.dto.CatListDTO;
@@ -30,8 +31,8 @@ public class MasterController {
     }
 
     @GetMapping("/cats/{id}")
-    public CatListDTO retrieveCats(@PathVariable("id") @Min(1) Long masterId) {
-        var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getCatsMasterQueue", masterId);
+    public List<CatDTO> retrieveCats(@PathVariable("id") @Min(1) Long masterId) {
+        var catListDTO = (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getCatsMasterQueue", masterId);
         return catListDTO;
     }
 
@@ -42,8 +43,8 @@ public class MasterController {
     }
 
     @GetMapping("/retrieve/all")
-    public MasterListDTO retrieveAllMasters() {
-        var masterListDTO = (MasterListDTO) rabbitTemplate.convertSendAndReceive("getAllMasterQueue");
+    public List<MasterDTO> retrieveAllMasters() {
+        var masterListDTO = (List<MasterDTO>) rabbitTemplate.convertSendAndReceive("getAllMasterQueue");
         return masterListDTO;
     }
 }

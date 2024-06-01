@@ -44,27 +44,27 @@ public class CatController {
     }
 
     @GetMapping("/friends/{id}")
-    public CatListDTO retrieveFriends(@PathVariable("id") @Min(1) Long catId) {
-        var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getFriendsCatQueue", catId);
+    public List<CatDTO> retrieveFriends(@PathVariable("id") @Min(1) Long catId) {
+        var catListDTO = (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getFriendsCatQueue", catId);
         return catListDTO;
     }
 
     @GetMapping("/bycolor/{color}")
-    public CatListDTO retrieveAllByColor(@PathVariable("color") ColorDTO color) {
+    public List<CatDTO> retrieveAllByColor(@PathVariable("color") ColorDTO color) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getAllCatsByColorCatQueue", color);
+            var catListDTO = (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getAllCatsByColorCatQueue", color);
             return catListDTO;
         }
         Object principal = authentication.getPrincipal();
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();
             Long masterId = userService.getUserByUsername(username).master();
-            var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getCatsByColorCatQueue", new ColorAndIdDTO(color.color(), masterId));
+            var catListDTO = (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getCatsByColorCatQueue", new ColorAndIdDTO(color.color(), masterId));
             return catListDTO;
         }
 
-        return new CatListDTO(new ArrayList<>());
+        return new ArrayList<>();
     }
 
     @GetMapping("/retrieve/{id}")
@@ -73,8 +73,8 @@ public class CatController {
     }
 
     @GetMapping("/retrieve/all")
-    public CatListDTO retrieveAllCats() {
-        var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getAllCatQueue");
+    public List<CatDTO> retrieveAllCats() {
+        var catListDTO = (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getAllCatQueue");
         return catListDTO;
     }
 }
