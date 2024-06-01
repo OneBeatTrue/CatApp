@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.onebeattrue.dto.*;
 import ru.onebeattrue.entities.cat.Cat;
 import ru.onebeattrue.exceptions.FriendshipException;
