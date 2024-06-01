@@ -3,12 +3,17 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/BLL/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/BLL/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/DAL/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/DAL/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/CatService/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DTO/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/DTO/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/PLL/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/PLL/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Entities/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/GeneralService/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/MainService/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/MainService/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/MasterService/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Model/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Model/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Models/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Run/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Run/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

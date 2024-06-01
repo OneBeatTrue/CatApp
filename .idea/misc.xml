@@ -12,7 +12,11 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/BLL/pom.xml" />
         <option value="$PROJECT_DIR$/DTO/pom.xml" />
+        <option value="$PROJECT_DIR$/Entities/pom.xml" />
+        <option value="$PROJECT_DIR$/MainService/pom.xml" />
+        <option value="$PROJECT_DIR$/Model/pom.xml" />
         <option value="$PROJECT_DIR$/Run/pom.xml" />
       </set>
     </option>

@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:latest
+    hostname: rabbitmq
+    environment:
+      - TZ=Europe/Moscow
+      - RABBITMQ_DEFAULT_USER=obt
+      - RABBITMQ_DEFAULT_PASS=1234
+      - RABBITMQ_DEFAULT_VHOST=vhost
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+
+  general-postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=obt_general
+      - POSTGRES_PASSWORD=1234_general
+      - POSTGRES_DB=db_general
+    ports:
+      - "1340:5432"
+    restart: unless-stopped
+
+  master-postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=obt_master
+      - POSTGRES_PASSWORD=1234_master
+      - POSTGRES_DB=db_master
+    ports:
+      - "1338:5432"
+    restart: unless-stopped
+
+  cat-postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=obt_cat
+      - POSTGRES_PASSWORD=1234_cat
+      - POSTGRES_DB=db_cat
+    ports:
+      - "1339:5432"
+    restart: unless-stopped
