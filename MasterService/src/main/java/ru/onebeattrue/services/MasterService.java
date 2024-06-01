@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import ru.onebeattrue.dto.CatDTO;
 import ru.onebeattrue.dto.CatListDTO;
 import ru.onebeattrue.dto.MasterDTO;
 import ru.onebeattrue.dto.MasterListDTO;
@@ -35,8 +36,8 @@ public class MasterService {
     }
 
     @RabbitListener(queues = "getCatsMasterQueue")
-    public CatListDTO getCats(Long masterId) {
-        return (CatListDTO) rabbitTemplate.convertSendAndReceive("getCatsByMasterCatQueue", masterId);
+    public List<CatDTO> getCats(Long masterId) {
+        return (List<CatDTO>) rabbitTemplate.convertSendAndReceive("getCatsByMasterCatQueue", masterId);
     }
 
     @RabbitListener(queues = "getMasterByIdMasterQueue")
@@ -45,12 +46,12 @@ public class MasterService {
     }
 
     @RabbitListener(queues = "getAllMasterQueue")
-    public MasterListDTO getAll() {
+    public List<MasterDTO> getAll() {
         List<MasterDTO> masters = new ArrayList<>();
         for (Master master : masterRepository.findAll()) {
             masters.add(new MasterDTO(master));
         }
 
-        return new MasterListDTO(masters);
+        return masters;
     }
 }

@@ -5,6 +5,6 @@ import java.io.Serializable;
 import java.util.List;
 
 public record MasterListDTO (
-    @NotNull List<MasterDTO> masters
+    List<MasterDTO> masters
 ) implements Serializable {}
 

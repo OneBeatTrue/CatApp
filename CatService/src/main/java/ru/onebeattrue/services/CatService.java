@@ -73,14 +73,14 @@ public class CatService {
     }
 
     @RabbitListener(queues = "getFriendsCatQueue")
-    public List<CatDTO> getFriends(Long catId) {
+    public CatListDTO getFriends(Long catId) {
         var cat = catRepository.findById(catId).orElseThrow(() -> new NotFoundException("Cat " + catId + " "));
         List<CatDTO> friends = new ArrayList<>();
         for (Cat friend : cat.getFriends()) {
             friends.add(new CatDTO(friend));
         }
 
-        return friends;
+        return new CatListDTO(friends);
     }
 
     @RabbitListener(queues = "getAllCatsByColorCatQueue")

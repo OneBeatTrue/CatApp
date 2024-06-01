@@ -11,6 +11,7 @@ import ru.onebeattrue.dto.MasterListDTO;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -24,14 +25,14 @@ public class MasterController {
     private final RabbitTemplate rabbitTemplate;
 
     @PostMapping("/create")
-    public void create(@Valid @RequestBody MasterDTO master) {
-        rabbitTemplate.convertAndSend("createMasterQueue", master);
+    public MasterDTO create(@Valid @RequestBody MasterDTO master) {
+        return (MasterDTO) rabbitTemplate.convertSendAndReceive("createMasterQueue", master);
     }
 
     @GetMapping("/cats/{id}")
-    public List<CatDTO> retrieveCats(@PathVariable("id") @Min(1) Long masterId) {
+    public CatListDTO retrieveCats(@PathVariable("id") @Min(1) Long masterId) {
         var catListDTO = (CatListDTO) rabbitTemplate.convertSendAndReceive("getCatsMasterQueue", masterId);
-        return catListDTO.cats();
+        return catListDTO;
     }
 
     @GetMapping("/retrieve/{id}")
@@ -41,8 +42,8 @@ public class MasterController {
     }
 
     @GetMapping("/retrieve/all")
-    public List<MasterDTO> retrieveAllMasters() {
+    public MasterListDTO retrieveAllMasters() {
         var masterListDTO = (MasterListDTO) rabbitTemplate.convertSendAndReceive("getAllMasterQueue");
-        return masterListDTO.masters();
+        return masterListDTO;
     }
 }

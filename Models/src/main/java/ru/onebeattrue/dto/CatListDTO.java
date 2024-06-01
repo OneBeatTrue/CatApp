@@ -5,5 +5,5 @@ import java.io.Serializable;
 import java.util.List;
 
 public record CatListDTO (
-        @NotNull List<CatDTO> cats
+        List<CatDTO> cats
 ) implements Serializable {}
